@@ -1,4 +1,4 @@
-use crate::core::models::CoinPrice;
+use crate::core::models::{CoinPrice, TimeSeriesPoint};
 use reqwest::Client;
 
 const COINGECKO_BASE_URL: &str = "https://api.coingecko.com/api/v3";
@@ -56,6 +56,52 @@ pub async fn fetch_simple_prices(
                             price: price_f64,
                         });
                     }
+                }
+            }
+        }
+    }
+
+    Ok(result)
+}
+
+pub async fn fetch_market_chart(
+    client: &Client,
+    coin_id: &str,
+    vs_currency: &str,
+    days: u32,
+) -> Result<Vec<TimeSeriesPoint>, Box<dyn std::error::Error + Send + Sync>> {
+    let url = format!(
+        "{}/coins/{}/market_chart",
+        COINGECKO_BASE_URL, coin_id
+    );
+
+    let resp = client
+        .get(&url)
+        .query(&[
+            ("vs_currency", vs_currency),
+            ("days", &days.to_string()),
+        ])
+        .send()
+        .await?;
+
+    if !resp.status().is_success() {
+        return Err(format!("Coingecko HTTP-Fehler: {}", resp.status()).into());
+    }
+
+    let json_value: serde_json::Value = resp.json().await?;
+
+    let mut result = Vec::new();
+
+    if let Some(prices) = json_value.get("prices").and_then(|v| v.as_array()) {
+        for entry in prices {
+            if let Some(pair) = entry.as_array() {
+                if pair.len() == 2 {
+                    let ts = pair[0].as_i64().unwrap_or(0);
+                    let price = pair[1].as_f64().unwrap_or(0.0);
+                    result.push(TimeSeriesPoint {
+                        timestamp_ms: ts,
+                        price,
+                    });
                 }
             }
         }

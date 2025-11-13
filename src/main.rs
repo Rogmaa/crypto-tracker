@@ -1,6 +1,6 @@
 use clap::Parser;
 
-use crypto_tracker::core::services::get_current_prices;
+use crypto_tracker::core::services::{get_current_prices, get_market_chart};
 use crypto_tracker::presentation::cli::{Cli, Commands};
 
 #[tokio::main]
@@ -37,8 +37,21 @@ async fn main() {
                 }
             }
         }
+
         Commands::Watch { .. } => {
             println!("Watch-Mode noch nicht implementiert.");
+        }
+
+        Commands::ShowChart { coin, vs_currency, days } => {
+            match get_market_chart(&coin, &vs_currency, days).await {
+                Ok(series) => {
+                    println!("{} Datenpunkte erhalten", series.len());
+                    for p in series.iter().take(5) {
+                        println!("{} -> {}", p.timestamp_ms, p.price);
+                    }
+                }
+                Err(e) => eprintln!("Fehler: {}", e),
+            }
         }
     }
 }

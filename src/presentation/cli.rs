@@ -31,4 +31,15 @@ pub enum Commands {
         #[arg(long, default_value_t = 10)]
         interval: u64,
     },
+
+    ShowChart {
+    #[arg(long)]
+    coin: String,
+
+    #[arg(long, default_value = "eur")]
+    vs_currency: String,
+
+    #[arg(long, default_value_t = 7)]
+    days: u32,
+    }
 }

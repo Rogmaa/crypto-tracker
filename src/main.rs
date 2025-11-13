@@ -1,10 +1,7 @@
-mod cli;
-mod api;
-mod models;
-
 use clap::Parser;
-use cli::{Cli, Commands};
-use reqwest::Client;
+
+use crypto_tracker::cli::{Cli, Commands};
+use crypto_tracker::get_current_prices;
 
 #[tokio::main]
 async fn main() {
@@ -17,10 +14,7 @@ async fn main() {
                 std::process::exit(1);
             }
 
-            let client = Client::new();
-
-            // API-Call
-            match api::fetch_simple_prices(&client, &coins, &vs_currency).await {
+            match get_current_prices(&coins, &vs_currency).await {
                 Ok(prices) => {
                     if prices.is_empty() {
                         println!("Keine Preise erhalten. Prüfe Coin-IDs und Währung.");
@@ -49,12 +43,8 @@ async fn main() {
             vs_currency,
             interval,
         } => {
-            println!("Subcommand: watch");
-            println!("Coins:       {:?}", coins);
-            println!("Vs currency: {}", vs_currency);
-            println!("Interval:    {} s", interval);
-
-            // TODO: Später Implementierung des Watch-Modes mit Schleife + Sleep
+            println!("Watch-Mode noch nicht implementiert.");
+            println!("Coins: {:?}, vs_currency: {}, interval: {}s", coins, vs_currency, interval);
         }
     }
 }

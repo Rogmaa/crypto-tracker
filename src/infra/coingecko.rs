@@ -1,9 +1,12 @@
-use crate::models::CoinPrice;
+use crate::core::models::CoinPrice;
 use reqwest::Client;
 
 const COINGECKO_BASE_URL: &str = "https://api.coingecko.com/api/v3";
 
-/// Docs: https://www.coingecko.com/en/api/documentation
+pub fn make_client() -> Client {
+    Client::new()
+}
+
 pub async fn fetch_simple_prices(
     client: &Client,
     coins: &[String],

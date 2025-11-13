@@ -1,7 +1,7 @@
 use clap::Parser;
 
-use crypto_tracker::cli::{Cli, Commands};
-use crypto_tracker::get_current_prices;
+use crypto_tracker::core::services::get_current_prices;
+use crypto_tracker::presentation::cli::{Cli, Commands};
 
 #[tokio::main]
 async fn main() {
@@ -10,7 +10,7 @@ async fn main() {
     match cli.command {
         Commands::Price { coins, vs_currency } => {
             if coins.is_empty() {
-                eprintln!("Fehler: Du musst mindestens einen Coin angeben via --coins btc,eth,sol");
+                eprintln!("Fehler: Du musst mindestens einen Coin angeben via --coins bitcoin,ethereum");
                 std::process::exit(1);
             }
 
@@ -37,14 +37,8 @@ async fn main() {
                 }
             }
         }
-
-        Commands::Watch {
-            coins,
-            vs_currency,
-            interval,
-        } => {
+        Commands::Watch { .. } => {
             println!("Watch-Mode noch nicht implementiert.");
-            println!("Coins: {:?}, vs_currency: {}, interval: {}s", coins, vs_currency, interval);
         }
     }
 }
